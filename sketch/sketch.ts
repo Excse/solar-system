@@ -1,9 +1,21 @@
-let distanceScaleSlider: p5.Element;
 let timeStepSlider: p5.Element;
+let centerCheckbox: p5.Element;
+let centeredPlanet: p5.Element;
+
 let planets: Planet[] = [];
+let controls: Controls;
+
+// @ts-ignore
+window.mousePressed = (event) => controls.mousePressed(event);
+// @ts-ignore
+window.mouseDragged = (event) => controls.mouseDragged(event);
+window.mouseReleased = () => controls.mouseReleased();
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const canvas = createCanvas(windowWidth, windowHeight);
+
+  controls = new Controls();
+  canvas.mouseWheel((event) => controls.mouseWheel(event));
 
   timeStepSlider = createSlider(
     TIME_STEP_MIN,
@@ -13,13 +25,8 @@ function setup() {
   );
   timeStepSlider.position(10, 20);
 
-  distanceScaleSlider = createSlider(
-    PLANET_SCALE_MIN,
-    PLANET_SCALE_MAX,
-    PLANET_SCALE_DEFAULT,
-    PLANET_SCALE_STEP
-  );
-  distanceScaleSlider.position(10, 60);
+  centerCheckbox = createCheckbox(" Centered Planet");
+  centerCheckbox.position(10, 40);
 
   const sun = new Planet({
     name: "Sun",
@@ -63,6 +70,11 @@ function setup() {
     velocity: createVector(0, 24.1e3),
   });
   planets.push(mars);
+
+  centeredPlanet = createSelect();
+  centeredPlanet.position(10, 60);
+  // @ts-ignore
+  planets.forEach((planet) => centeredPlanet.option(planet.name));
 }
 
 function windowResized() {
@@ -75,11 +87,25 @@ function draw() {
   const timeStep = timeStepSlider.value() as number;
   text("Time Step: " + humanizeDuration(timeStep * 1000), 10, 15);
 
-  const distanceScale = distanceScaleSlider.value() as number;
-  text("Distance Scale: " + distanceScale, 10, 50);
+  translate(controls.view.x, controls.view.y);
+  scale(controls.view.zoom);
 
-  translate(width / 2, height / 2);
+  // @ts-ignore
+  if (!centerCheckbox.checked()) {
+    translate(width / 2, height / 2);
+  } else {
+    // @ts-ignore
+    const planetName = centeredPlanet.value();
+    const planet: Planet = planets.filter(
+      (planet) => planet.name === planetName
+    )[0];
+
+    const x = planet.position.x * PLANET_SCALE;
+    const y = planet.position.y * PLANET_SCALE;
+
+    translate(width / 2 - x, height / 2 - y);
+  }
 
   planets.forEach((planet) => planet.update(planets, timeStep));
-  planets.forEach((planet) => planet.draw(distanceScale));
+  planets.forEach((planet) => planet.draw());
 }

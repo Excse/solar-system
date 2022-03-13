@@ -50,14 +50,22 @@ class Planet {
     this._force.set(0, 0);
   };
 
-  public draw = (distanceScale: number): void => {
-    const diameter = this._diameter * distanceScale;
-    const x = this._position.x * distanceScale;
-    const y = this._position.y * distanceScale;
+  public draw = (): void => {
+    const diameter = this._diameter * PLANET_SCALE;
+    const x = this._position.x * PLANET_SCALE;
+    const y = this._position.y * PLANET_SCALE;
 
     const nameWidth = textWidth(this._name);
     text(this._name, x - nameWidth / 2, y - diameter / 2 - textSize());
 
     circle(x, y, diameter + 1);
   };
+
+  get position(): p5.Vector {
+    return this._position;
+  }
+
+  get name(): string {
+    return this._name;
+  }
 }
