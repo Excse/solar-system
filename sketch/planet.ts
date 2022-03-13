@@ -2,6 +2,7 @@ interface PlanetInit {
   name: string;
   diameter: number;
   mass: number;
+  color: p5.Color;
   velocity?: p5.Vector;
   position?: p5.Vector;
   force?: p5.Vector;
@@ -17,6 +18,7 @@ class Planet {
   private readonly _force: p5.Vector;
   private readonly _showTrail: boolean;
   private readonly _trail: p5.Vector[];
+  private readonly _color: p5.Color;
 
   constructor(init: PlanetInit) {
     this._diameter = init.diameter;
@@ -26,6 +28,7 @@ class Planet {
     this._velocity = init.velocity ? init.velocity : createVector();
     this._force = init.force ? init.force : createVector();
     this._showTrail = init.showTrail !== undefined ? init.showTrail : true;
+    this._color = init.color ? init.color : color(0);
     this._trail = [];
   }
 
@@ -67,19 +70,38 @@ class Planet {
 
     const nameWidth = textWidth(this._name);
     text(this._name, x - nameWidth / 2, y - diameter / 2 - textSize());
-    circle(x, y, diameter + 1);
 
-    if (this._showTrail) {
+    if (this._showTrail && this._trail.length > 2) {
       push();
-      noFill();
-      beginShape();
       const trailCopy = [...this._trail];
-      trailCopy.forEach((point) =>
-        vertex(point.x * PLANET_SCALE, point.y * PLANET_SCALE)
-      );
-      endShape();
+      noFill();
+      for (let index = 1; index < trailCopy.length; index++) {
+        const p1 = trailCopy[index - 1];
+        const p2 = trailCopy[index];
+        stroke(0, ((index / trailCopy.length) * 255) / 2);
+        line(
+          p1.x * PLANET_SCALE,
+          p1.y * PLANET_SCALE,
+          p2.x * PLANET_SCALE,
+          p2.y * PLANET_SCALE
+        );
+      }
       pop();
     }
+
+    push();
+    noStroke();
+    this.glow(this._color, 10);
+    fill(this._color);
+    circle(x, y, diameter + 3);
+    pop();
+  };
+
+  public glow = (color: p5.Color, blurriness: number) => {
+    // @ts-ignore
+    const context: CanvasRenderingContext2D = drawingContext;
+    context.shadowBlur = blurriness;
+    context.shadowColor = color.toString();
   };
 
   get position(): p5.Vector {

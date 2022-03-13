@@ -31,11 +31,15 @@ function setup() {
   centerCheckbox = createCheckbox(" Centered Planet");
   centerCheckbox.position(10, 40);
 
+  centeredPlanet = createSelect();
+  centeredPlanet.position(10, 60);
+
   const sun = new Planet({
     name: "Sun",
     mass: 1.98892e30,
     diameter: 1392700000,
     showTrail: false,
+    color: color(255, 255, 0),
   });
   planets.push(sun);
 
@@ -45,6 +49,7 @@ function setup() {
     diameter: 4879e3,
     position: createVector(57.9e9, 0),
     velocity: createVector(0, 47.4e3),
+    color: color(219, 206, 202),
   });
   planets.push(mercury);
 
@@ -54,6 +59,7 @@ function setup() {
     diameter: 12104e3,
     position: createVector(108.2e9, 0),
     velocity: createVector(0, 35.0e3),
+    color: color(139, 125, 130),
   });
   planets.push(venus);
 
@@ -63,6 +69,7 @@ function setup() {
     diameter: 12756e3,
     position: createVector(149.6e9, 0),
     velocity: createVector(0, 29.8e3),
+    color: color(0, 0, 165),
   });
   planets.push(earth);
 
@@ -72,13 +79,15 @@ function setup() {
     diameter: 6792e3,
     position: createVector(228.0e9, 0),
     velocity: createVector(0, 24.1e3),
+    color: color(188, 39, 49),
   });
   planets.push(mars);
 
-  centeredPlanet = createSelect();
-  centeredPlanet.position(10, 60);
-  // @ts-ignore
-  planets.forEach((planet) => centeredPlanet.option(planet.name));
+  for (let index = 1; index < planets.length; index++) {
+    const planet = planets[index];
+    // @ts-ignore
+    centeredPlanet.option(planet.name);
+  }
 }
 
 function windowResized() {
