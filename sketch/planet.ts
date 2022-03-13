@@ -5,6 +5,7 @@ interface PlanetInit {
   velocity?: p5.Vector;
   position?: p5.Vector;
   force?: p5.Vector;
+  showTrail?: boolean;
 }
 
 class Planet {
@@ -14,6 +15,8 @@ class Planet {
   private readonly _velocity: p5.Vector;
   private readonly _position: p5.Vector;
   private readonly _force: p5.Vector;
+  private readonly _showTrail: boolean;
+  private readonly _trail: p5.Vector[];
 
   constructor(init: PlanetInit) {
     this._diameter = init.diameter;
@@ -22,6 +25,8 @@ class Planet {
     this._position = init.position ? init.position : createVector();
     this._velocity = init.velocity ? init.velocity : createVector();
     this._force = init.force ? init.force : createVector();
+    this._showTrail = init.showTrail !== undefined ? init.showTrail : true;
+    this._trail = [];
   }
 
   public attractTo = (planet: Planet) => {
@@ -47,6 +52,11 @@ class Planet {
     this._velocity.add(this._force.copy().div(this._mass).mult(timeStep));
     this._position.add(this._velocity.copy().mult(timeStep));
 
+    if (this._showTrail) {
+      this._trail.push(this._position.copy());
+      if (this._trail.length > 100) this._trail.shift();
+    }
+
     this._force.set(0, 0);
   };
 
@@ -57,8 +67,19 @@ class Planet {
 
     const nameWidth = textWidth(this._name);
     text(this._name, x - nameWidth / 2, y - diameter / 2 - textSize());
-
     circle(x, y, diameter + 1);
+
+    if (this._showTrail) {
+      push();
+      noFill();
+      beginShape();
+      const trailCopy = [...this._trail];
+      trailCopy.forEach((point) =>
+        vertex(point.x * PLANET_SCALE, point.y * PLANET_SCALE)
+      );
+      endShape();
+      pop();
+    }
   };
 
   get position(): p5.Vector {

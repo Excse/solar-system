@@ -5,6 +5,9 @@ let centeredPlanet: p5.Element;
 let planets: Planet[] = [];
 let controls: Controls;
 
+let translateX = 0;
+let translateY = 0;
+
 // @ts-ignore
 window.mousePressed = (event) => controls.mousePressed(event);
 // @ts-ignore
@@ -32,6 +35,7 @@ function setup() {
     name: "Sun",
     mass: 1.98892e30,
     diameter: 1392700000,
+    showTrail: false,
   });
   planets.push(sun);
 
@@ -87,23 +91,29 @@ function draw() {
   const timeStep = timeStepSlider.value() as number;
   text("Time Step: " + humanizeDuration(timeStep * 1000), 10, 15);
 
+  const fpsString = "FPS: " + frameRate().toFixed();
+  text(fpsString, width - textWidth(fpsString) - 10, 15);
+
+  controls.update();
   translate(controls.view.x, controls.view.y);
   scale(controls.view.zoom);
 
   // @ts-ignore
   if (!centerCheckbox.checked()) {
-    translate(width / 2, height / 2);
+    translateX = lerp(translateX, 0, 0.15);
+    translateY = lerp(translateY, 0, 0.15);
+
+    translate(width / 2 - translateX, height / 2 - translateY);
   } else {
-    // @ts-ignore
     const planetName = centeredPlanet.value();
     const planet: Planet = planets.filter(
       (planet) => planet.name === planetName
     )[0];
 
-    const x = planet.position.x * PLANET_SCALE;
-    const y = planet.position.y * PLANET_SCALE;
+    translateX = lerp(translateX, planet.position.x * PLANET_SCALE, 0.15);
+    translateY = lerp(translateY, planet.position.y * PLANET_SCALE, 0.15);
 
-    translate(width / 2 - x, height / 2 - y);
+    translate(width / 2 - translateX, height / 2 - translateY);
   }
 
   planets.forEach((planet) => planet.update(planets, timeStep));
